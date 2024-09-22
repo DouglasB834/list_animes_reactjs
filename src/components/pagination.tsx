@@ -14,7 +14,6 @@ import { Button } from "./ui/button";
 interface IPaginationProps {
   currentPage: number;
   totalPages: number;
-  // setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const Pagination = ({ currentPage, totalPages }: IPaginationProps) => {

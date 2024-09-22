@@ -9,7 +9,7 @@ export const router = createBrowserRouter([
     element: <App />,
   },
   {
-    path: "details/:id", // Rota independente
+    path: "details/:id",
     element: <AnimeDetailsPage />,
   },
 ]);

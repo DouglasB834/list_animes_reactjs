@@ -107,6 +107,7 @@ export const Dashboard = () => {
     setSearchText(form.search.value);
     setSearchParams("1");
   };
+
   const handleClearSearch = () => {
     setSearchText("");
     setSearchParams("1");
