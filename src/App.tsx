@@ -7,7 +7,9 @@ import {
   TableRow,
 } from "./components/ui/table";
 import { format } from "date-fns";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+
+import { useQuery } from "@tanstack/react-query";
 
 import { api } from "./api/axios";
 import { Pagination } from "./components/pagination";
@@ -29,39 +31,57 @@ interface Anime {
     updatedAt: string;
   };
 }
+interface AnimeResponse {
+  data: Anime[];
+  links: {
+    first: string;
+    next: string;
+    last: string;
+  };
+  meta: {
+    count: number;
+  };
+}
 
 export function App() {
-  const [animes, setAnimes] = useState<Anime[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  const [searchParams] = useSearchParams();
+  const currentPage = searchParams.get("page")
+    ? Number(searchParams.get("page"))
+    : 1;
+
   const itemsPerPage = 20;
 
-  const fetchAnimeList = async () => {
-    try {
-      const offset = (currentPage - 1) * itemsPerPage;
-      const response = await api.get(
-        `https://kitsu.io/api/edge/anime?page[limit]=${itemsPerPage}&page[offset]=${offset}`
-      );
-      console.log(response.data);
-      setAnimes(response.data.data);
-      setTotalItems(response.data.meta.count);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      console.log(error?.response ? error?.response?.data.errors[0] : error);
-      console.error("Error fetching animes:", error);
-    }
+  const fetchAnimeList = async (page: number) => {
+    const offset = (page - 1) * itemsPerPage;
+    const response = await api.get(
+      `anime?page[limit]=${itemsPerPage}&page[offset]=${offset}`
+    );
+    return response.data;
   };
 
-  useEffect(() => {
-    fetchAnimeList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage]);
+  const {
+    data: animesResponse,
+    isLoading,
+    error,
+  } = useQuery<AnimeResponse>({
+    queryKey: ["animeList", currentPage],
+    queryFn: () => fetchAnimeList(currentPage),
+  });
 
-  const totalPages = Math.ceil(totalItems / itemsPerPage); // para caso sobre alguma pagina arredondar para cima
+  const totalItems = animesResponse?.meta?.count ?? 0;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "dd/MM/yyyy");
   };
+
+  if (isLoading) {
+    return <p>Carregando...</p>;
+  }
+
+  if (error) {
+    return <p>Erro ao buscar animes.</p>;
+  }
 
   return (
     <div className="container mx-auto py-10">
@@ -72,11 +92,13 @@ export function App() {
             <TableHead>Título</TableHead>
             <TableHead>Slug</TableHead>
             <TableHead>Data de Criação</TableHead>
-            <TableHead>Data de Atualização</TableHead>
+            <TableHead className="hidden  sm:table-cell">
+              Data de Atualização
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {animes.map((anime) => (
+          {animesResponse?.data.map((anime: Anime) => (
             <TableRow key={anime?.id}>
               <TableCell>
                 <img
@@ -88,16 +110,20 @@ export function App() {
               <TableCell>{anime?.attributes?.titles.en}</TableCell>
               <TableCell>{anime?.attributes?.slug}</TableCell>
               <TableCell>{formatDate(anime?.attributes?.createdAt)}</TableCell>
-              <TableCell>{formatDate(anime?.attributes?.updatedAt)}</TableCell>
+              <TableCell className="hidden sm:table-cell">
+                {formatDate(anime?.attributes?.updatedAt)}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        setCurrentPage={setCurrentPage}
-      />
+      {animesResponse && (
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          // setCurrentPage={setCurrentPage}
+        />
+      )}
     </div>
   );
 }

@@ -1,52 +1,123 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import React from "react";
+import {
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "./ui/pagination";
+import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 import { Button } from "./ui/button";
 
 interface IPaginationProps {
   currentPage: number;
   totalPages: number;
-  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  // setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const Pagination = ({
-  currentPage,
-  totalPages,
-  setCurrentPage,
-}: IPaginationProps) => {
-  const handlePreviousPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
+export const Pagination = ({ currentPage, totalPages }: IPaginationProps) => {
+  const [, setSearchParams] = useSearchParams();
+
+  const firstPage = () => {
+    setSearchParams((params) => {
+      params.set("page", "1");
+      return params;
+    });
   };
 
-  const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  const prevPage = () => {
+    if (currentPage - 1 <= 0) return;
+    setSearchParams((params) => {
+      params.set("page", String(currentPage - 1));
+      return params;
+    });
   };
+  const nextPage = () => {
+    if (currentPage + 1 > totalPages) return;
+
+    setSearchParams((params) => {
+      params.set("page", String(currentPage + 1));
+      return params;
+    });
+  };
+
+  const lastPage = () => {
+    setSearchParams((params) => {
+      params.set("page", String(totalPages));
+      return params;
+    });
+  };
+  const setPage = (page: number) => {
+    setSearchParams((params) => {
+      params.set("page", String(page));
+      return params;
+    });
+  };
+
+  const nextperPage = currentPage < totalPages ? currentPage + 1 : totalPages;
+  const prevPerPage = currentPage > 1 ? currentPage - 1 : 1;
 
   return (
-    <div className="flex items-center justify-between space-x-2 py-4">
-      <div className="text-sm text-muted-foreground">
+    <div className="flex items-center justify-between space-x-2 py-4 gap-3 flex-wrap w-full ">
+      <div className="text-sm text-muted-foreground pl-4 flex justify-center w-full  sm:w-auto ">
         Página {currentPage} de {totalPages}
       </div>
-      <div className="space-x-2">
+      <PaginationContent className="flex justify-center w-full  sm:w-auto">
         <Button
-          variant="outline"
-          size="sm"
-          disabled={currentPage === 1}
-          onClick={handlePreviousPage}
+          className="bg-gray-100 text-black hover:text-primary-foreground text-xs h-5 md:h-6 w-6 md:w-6"
+          title="Firtpage"
+          aria-label="Click to first page"
+          size="icon"
+          onClick={firstPage}
         >
-          <ChevronLeft className="h-4 w-4" />
-          <span className="sr-only">Página anterior</span>
+          <ChevronsLeft />
         </Button>
+        <PaginationItem>
+          <PaginationPrevious
+            className="text-xs sm:text-sm"
+            aria-label="Previous page"
+            onClick={prevPage}
+          />
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink
+            className={`${currentPage == 1 ? "hidden" : ""} text-`}
+            aria-label="Previous page"
+            onClick={() => setPage(prevPerPage)}
+          >
+            {currentPage == 1 ? null : prevPerPage}
+          </PaginationLink>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink isActive>{currentPage}</PaginationLink>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink
+            aria-label="Next page"
+            className={`${currentPage == totalPages ? "hidden" : ""} `}
+            onClick={() => setPage(nextperPage)}
+          >
+            {nextperPage}
+          </PaginationLink>
+        </PaginationItem>
+        <PaginationItem className="hidden sm:block ">
+          {currentPage !== totalPages && <PaginationEllipsis />}
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationNext className="text-xs sm:text-sm" onClick={nextPage} />
+        </PaginationItem>
         <Button
-          variant="outline"
-          size="sm"
-          disabled={currentPage === totalPages}
-          onClick={handleNextPage}
+          className="bg-gray-100 text-black hover:text-primary-foreground h-5 md:h-6 w-6 md:w-6"
+          size="icon"
+          title="last page "
+          aria-label="click to last page"
+          onClick={lastPage}
         >
-          <ChevronRight className="h-4 w-4" />
-          <span className="sr-only">Próxima página</span>
+          <ChevronsRight />
         </Button>
-      </div>
+      </PaginationContent>
     </div>
   );
 };
