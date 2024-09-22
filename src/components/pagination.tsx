@@ -34,6 +34,7 @@ export const Pagination = ({ currentPage, totalPages }: IPaginationProps) => {
       return params;
     });
   };
+
   const nextPage = () => {
     if (currentPage + 1 > totalPages) return;
 
@@ -49,6 +50,7 @@ export const Pagination = ({ currentPage, totalPages }: IPaginationProps) => {
       return params;
     });
   };
+
   const setPage = (page: number) => {
     setSearchParams((params) => {
       params.set("page", String(page));
@@ -66,6 +68,7 @@ export const Pagination = ({ currentPage, totalPages }: IPaginationProps) => {
       </div>
       <PaginationContent className="flex justify-center w-full  sm:w-auto">
         <Button
+          disabled={currentPage == 1}
           className="bg-gray-100 text-black hover:text-primary-foreground text-xs h-5 md:h-6 w-6 md:w-6"
           title="Firtpage"
           aria-label="Click to first page"
@@ -76,7 +79,10 @@ export const Pagination = ({ currentPage, totalPages }: IPaginationProps) => {
         </Button>
         <PaginationItem>
           <PaginationPrevious
-            className="text-xs sm:text-sm"
+            isActive={currentPage !== 1}
+            className={`${
+              currentPage == 1 ? "" : "cursor-pointer"
+            } text-xs sm:text-sm`}
             aria-label="Previous page"
             onClick={prevPage}
           />
@@ -109,7 +115,10 @@ export const Pagination = ({ currentPage, totalPages }: IPaginationProps) => {
           <PaginationNext className="text-xs sm:text-sm" onClick={nextPage} />
         </PaginationItem>
         <Button
-          className="bg-gray-100 text-black hover:text-primary-foreground h-5 md:h-6 w-6 md:w-6"
+          disabled={currentPage == totalPages}
+          className={`bg-gray-100 text-black hover:text-primary-foreground text-xs h-5 md:h-6 w-6 md:w-6 ${
+            currentPage == totalPages ? "" : "cursor-pointer"
+          }`}
           size="icon"
           title="last page "
           aria-label="click to last page"
