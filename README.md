@@ -1,3 +1,9 @@
+## Acesse o Projeto
+
+Você pode acessar a aplicação hospedada no Vercel através do seguinte link:
+
+[Anime List l](https://list-animes-reactjs.vercel.app/)
+
 # Anime List
 
 Este projeto é uma aplicação web desenvolvida em React com TypeScript, que permite aos usuários explorar uma lista de animes. A aplicação utiliza a API do Kitsu para buscar informações sobre animes, incluindo detalhes como título, sinopse, avaliação média e muito mais.
