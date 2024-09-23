@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 
 import AnimeDetailsPage from "./pages/datalis/detalis";
 import { MainLayout } from "./pages/mainLayout";
+import NotFound from "./pages/notFound";
 import { App } from "./App";
 
 export const router = createBrowserRouter([
@@ -18,5 +19,9 @@ export const router = createBrowserRouter([
         element: <AnimeDetailsPage />,
       },
     ],
+  },
+  {
+    path: "*", // Rota para qualquer caminho não encontrado
+    element: <NotFound />,
   },
 ]);
