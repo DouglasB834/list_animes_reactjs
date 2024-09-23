@@ -33,7 +33,21 @@ interface AnimeDetails {
     status: string;
     episodeCount: number;
     episodeLength: number;
+    youtubeVideoId?: string;
   };
+}
+
+function YouTubeEmbed({ videoId }: { videoId: string }) {
+  return (
+    <div className=" ">
+      <iframe
+        src={`https://www.youtube.com/embed/${videoId}`}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        className="w-full  h-full rounded-lg min-h-[300px]"
+      />
+    </div>
+  );
 }
 
 export default function AnimeDetailsPage() {
@@ -124,6 +138,12 @@ export default function AnimeDetailsPage() {
               </div>
             </div>
           </div>
+          {anime?.attributes?.youtubeVideoId && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-2">Trailer</h3>
+              <YouTubeEmbed videoId={anime?.attributes?.youtubeVideoId} />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
