@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { format } from "date-fns";
 import { FormEvent, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -22,6 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/axios";
 import { Pagination } from "@/components/pagination";
 import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/formatDate";
 
 import { Skeleton } from "./_components/skeleton";
 
@@ -40,6 +40,7 @@ interface Anime {
     synopsis: string;
     createdAt: string;
     updatedAt: string;
+    canonicalTitle: string;
   };
 }
 interface AnimeResponse {
@@ -75,6 +76,7 @@ export const Dashboard = () => {
       ? `anime?filter[text]=${searchText}&sort=${sortOrder}&page[limit]=${itemsPerPage}&page[offset]=${offset}`
       : `anime?sort=${sortOrder}&page[limit]=${itemsPerPage}&page[offset]=${offset}`;
     const response = await api.get(url);
+    console.log(response.data);
     return response.data;
   };
 
@@ -89,10 +91,6 @@ export const Dashboard = () => {
 
   const totalItems = animesResponse?.meta?.count ?? 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), "dd/MM/yyyy");
-  };
 
   useEffect(() => {
     if (isLoading) {
@@ -118,96 +116,102 @@ export const Dashboard = () => {
     setSearchParams("1");
   };
 
-  if (isLoading) {
-    return <Skeleton />;
-  }
-
   if (error) {
     return <p>Erro ao buscar animes.</p>;
   }
 
   return (
-    <div className="container mx-auto py-10 space-y-5">
-      <div className="flex flex-wrap gap-2 px-2 justify-between items-center border-b pb-4">
-        <form onSubmit={handleSearch}>
-          <input
-            type="text"
-            name="search"
-            placeholder="Search for anime..."
-            className="border p-2 w-44 sm:w-auto"
-          />
-          <Button type="submit" className="ml-2 p-2 bg-blue-500 text-white">
-            Search
-          </Button>
-          {searchText && (
-            <Button
-              type="button"
-              onClick={handleClearSearch}
-              className="ml-2 p-2 bg-blue-500 text-white"
-            >
-              Clear
+    <>
+      <div className="container mx-auto py-10 space-y-5 ">
+        <div className="flex flex-wrap gap-2 px-2 justify-between items-center border-b pb-4">
+          <form onSubmit={handleSearch}>
+            <input
+              type="text"
+              name="search"
+              placeholder="Search for anime..."
+              className="border rounded-sm p-2 w-44 sm:w-auto"
+            />
+            <Button type="submit" className="ml-2 p-2 bg-blue-500 text-white">
+              Search
             </Button>
-          )}
-        </form>
-        <Select onValueChange={handleSortChange} defaultValue={sortOrder}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Ordenar por" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="-createdAt">Mais recentes primeiro</SelectItem>
-            <SelectItem value="createdAt">Mais antigos primeiro</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px]">Imagem</TableHead>
-            <TableHead>Título</TableHead>
-            <TableHead>Slug</TableHead>
-            <TableHead className="hidden  sm:table-cell">
-              Data de Criação
-            </TableHead>
-            <TableHead className="hidden  sm:table-cell">
-              Data de Atualização
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {animesResponse?.data.map((anime: Anime) => (
-            <TableRow key={anime?.id} className="group">
-              <TableCell>
-                <Link
-                  title="details"
-                  to={`/details/${anime.id}`}
-                  aria-label="link to page details anime "
-                >
-                  <img
-                    src={anime?.attributes.posterImage.tiny}
-                    alt={
-                      anime?.attributes.titles.en ||
-                      anime?.attributes.titles.en_jp
-                    }
-                    sizes="100vw"
-                    className="w-16 h-24 object-cover  transition-transform ease-linear group-hover:scale-105 group-hover:animate-pulse"
-                  />
-                </Link>
-              </TableCell>
-              <TableCell>{anime?.attributes?.titles.en}</TableCell>
-              <TableCell>{anime?.attributes?.slug}</TableCell>
-              <TableCell className="hidden sm:table-cell">
-                {formatDate(anime?.attributes?.createdAt)}
-              </TableCell>
-              <TableCell className="hidden sm:table-cell">
-                {formatDate(anime?.attributes?.updatedAt)}
-              </TableCell>
+            {searchText && (
+              <Button
+                type="button"
+                onClick={handleClearSearch}
+                className="ml-2 p-2 bg-blue-500 text-white"
+              >
+                Clear
+              </Button>
+            )}
+          </form>
+          <Select onValueChange={handleSortChange} defaultValue={sortOrder}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Ordenar por" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="-createdAt">Mais recentes primeiro</SelectItem>
+              <SelectItem value="createdAt">Mais antigos primeiro</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Imagem</TableHead>
+              <TableHead>Título</TableHead>
+              <TableHead>Slug</TableHead>
+              <TableHead className="hidden  sm:table-cell">
+                Data de Criação
+              </TableHead>
+              <TableHead className="hidden  sm:table-cell">
+                Data de Atualização
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {animesResponse && (
-        <Pagination totalPages={totalPages} currentPage={currentPage} />
-      )}
-    </div>
+          </TableHeader>
+          {isLoading && <Skeleton />}
+          <TableBody>
+            {animesResponse?.data.map((anime: Anime) => (
+              <TableRow key={anime?.id} className="group">
+                <TableCell>
+                  <Link
+                    title="details"
+                    to={`/details/${anime.id}`}
+                    aria-label="link to page details anime "
+                  >
+                    <img
+                      src={anime?.attributes.posterImage.tiny}
+                      alt={
+                        anime?.attributes.titles.en ||
+                        anime?.attributes.titles.en_jp
+                      }
+                      sizes="100vw"
+                      className="w-16 h-24 object-cover rounded-sm transition-transform ease-linear group-hover:scale-105 group-hover:animate-pulse"
+                    />
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  {anime?.attributes?.titles.en ||
+                    anime?.attributes.titles.en_jp ||
+                    anime?.attributes.titles.ja_jp}
+                </TableCell>
+                <TableCell>
+                  {anime?.attributes?.slug.split("-").join(" ")}
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">
+                  {formatDate(anime?.attributes?.createdAt)}
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">
+                  {formatDate(anime?.attributes?.updatedAt)}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        {animesResponse && (
+          <Pagination totalPages={totalPages} currentPage={currentPage} />
+        )}
+      </div>
+    </>
   );
 };

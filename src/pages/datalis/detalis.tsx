@@ -12,8 +12,10 @@ import { Link } from "react-router-dom";
 
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/axios";
+import { formatDate } from "@/lib/formatDate";
 
 import { LoadingSkeleton } from "./_componets/skeleton";
+import { YouTubeEmbed } from "./_componets/youtube";
 
 interface AnimeDetails {
   id: string;
@@ -37,24 +39,11 @@ interface AnimeDetails {
   };
 }
 
-function YouTubeEmbed({ videoId }: { videoId: string }) {
-  return (
-    <div className=" ">
-      <iframe
-        src={`https://www.youtube.com/embed/${videoId}`}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        className="w-full  h-full rounded-lg min-h-[300px]"
-      />
-    </div>
-  );
-}
-
 export default function AnimeDetailsPage() {
   const { id } = useParams<{ id: string }>();
 
   const fetchAnimeDetails = async (id?: string) => {
-    const response = await api.get(`https://kitsu.io/api/edge/anime/${id}`);
+    const response = await api.get(`anime/${id}`);
     return response.data.data;
   };
 
@@ -121,19 +110,29 @@ export default function AnimeDetailsPage() {
                 </div>
                 <div>
                   <h4 className="font-semibold">Número de Episódios</h4>
-                  <p>{anime?.attributes?.episodeCount}</p>
+                  <p>{anime?.attributes?.episodeCount || "Em andamento"}</p>
                 </div>
                 <div>
                   <h4 className="font-semibold">Duração do Episódio</h4>
-                  <p>{anime?.attributes?.episodeLength} minutos</p>
+                  <p>
+                    {anime?.attributes?.episodeLength || "Em Analise"} minutos
+                  </p>
                 </div>
                 <div>
                   <h4 className="font-semibold">Data de Início</h4>
-                  <p>{anime?.attributes?.startDate}</p>
+                  <p>
+                    {anime?.attributes?.startDate
+                      ? formatDate(anime?.attributes?.startDate)
+                      : "Em andamento"}
+                  </p>
                 </div>
                 <div>
                   <h4 className="font-semibold">Data de Término</h4>
-                  <p>{anime?.attributes?.endDate || "Em andamento"}</p>
+                  <p>
+                    {anime?.attributes?.endDate
+                      ? formatDate(anime?.attributes?.endDate)
+                      : "Em andamento"}
+                  </p>
                 </div>
               </div>
             </div>
