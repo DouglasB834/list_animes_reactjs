@@ -2,7 +2,9 @@
 
 Você pode acessar a aplicação hospedada no Vercel através do seguinte link:
 
-[Anime List l](https://list-animes-reactjs.vercel.app/)
+[Anime List -> ](https://list-animes-reactjs.vercel.app/)
+
+<img src="./src/assets/animeList.png" alt="Prévia do Anime List" style="width: 500px; height: auto;" />
 
 # Anime List
 
@@ -46,16 +48,16 @@ git clone https://github.com/DouglasB834/list_animes_reactjs.git
 3. Instale as dependências:
 
    ```bash
-   npm install
+   yarn install
    ```
 
 4. Inicie o servidor de desenvolvimento:
 
    ```bash
-   npm run dev
+   yarn dev
    ```
 
-5. Acesse a aplicação no seu navegador em `http://localhost:3000`.
+5. Acesse a aplicação no seu navegador em `http://localhost:5173/`.
 
 ## Contribuições
 
