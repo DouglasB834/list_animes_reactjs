@@ -21,7 +21,7 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "*", // Rota para qualquer caminho não encontrado
+    path: "*",
     element: <NotFound />,
   },
 ]);

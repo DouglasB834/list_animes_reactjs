@@ -76,7 +76,6 @@ export const Dashboard = () => {
       ? `anime?filter[text]=${searchText}&sort=${sortOrder}&page[limit]=${itemsPerPage}&page[offset]=${offset}`
       : `anime?sort=${sortOrder}&page[limit]=${itemsPerPage}&page[offset]=${offset}`;
     const response = await api.get(url);
-    console.log(response.data);
     return response.data;
   };
 
@@ -86,7 +85,12 @@ export const Dashboard = () => {
     error,
   } = useQuery<AnimeResponse>({
     queryKey: ["animeList", currentPage, searchText, sortOrder],
-    queryFn: () => fetchAnimeList(currentPage, searchText, sortOrder),
+    queryFn: () => {
+      if (isNaN(currentPage) || currentPage < 1) {
+        throw new Error("Número da página inválido");
+      }
+      return fetchAnimeList(currentPage, searchText, sortOrder);
+    },
   });
 
   const totalItems = animesResponse?.meta?.count ?? 0;
@@ -104,6 +108,7 @@ export const Dashboard = () => {
     console.log(form.search.value, "aquiii ");
     setSearchText(form.search.value);
     setSearchParams("1");
+    form.search.value = "";
   };
 
   const handleClearSearch = () => {
@@ -117,7 +122,19 @@ export const Dashboard = () => {
   };
 
   if (error) {
-    return <p>Erro ao buscar animes.</p>;
+    return (
+      <div className="flex flex-col w-screen h-screen items-center justify-center gap-4 ">
+        <p>Erro ao buscar animes.</p>
+        <Link to="/">
+          <Button
+            aria-label="back home page"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+          >
+            Clique aqui para voltar
+          </Button>
+        </Link>
+      </div>
+    );
   }
 
   return (
@@ -129,7 +146,7 @@ export const Dashboard = () => {
               type="text"
               name="search"
               placeholder="Search for anime..."
-              className="border rounded-sm p-2 w-44 sm:w-auto"
+              className="border rounded-sm p-2 w-44 sm:w-auto dark:text-primary-foreground"
             />
             <Button type="submit" className="ml-2 p-2 bg-blue-500 text-white">
               Search
