@@ -85,12 +85,7 @@ export const Dashboard = () => {
     error,
   } = useQuery<AnimeResponse>({
     queryKey: ["animeList", currentPage, searchText, sortOrder],
-    queryFn: () => {
-      if (isNaN(currentPage) || currentPage < 1) {
-        throw new Error("Número da página inválido");
-      }
-      return fetchAnimeList(currentPage, searchText, sortOrder);
-    },
+    queryFn: () => fetchAnimeList(currentPage, searchText, sortOrder),
   });
 
   const totalItems = animesResponse?.meta?.count ?? 0;
@@ -105,7 +100,6 @@ export const Dashboard = () => {
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.target as HTMLFormElement;
-    console.log(form.search.value, "aquiii ");
     setSearchText(form.search.value);
     setSearchParams("1");
     form.search.value = "";
